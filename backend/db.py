@@ -1,4 +1,4 @@
-# pylint: disable=broad-exception-caught
+# pylint: disable=import-error,broad-except,broad-exception-caught
 """
 backend/db.py
 Database integration using PyMongo for MongoDB with automatic resilient fallback.
@@ -6,11 +6,15 @@ Stores and manages prediction history records cleanly.
 """
 
 import os
+import sys
 import json
 import uuid
 from datetime import datetime
 from pymongo import MongoClient, DESCENDING
-from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
+from pymongo.errors import PyMongoError, ConnectionFailure, ServerSelectionTimeoutError
+
+# Ensure parent directory is in sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 try:
     from backend.config import MONGO_URI, MONGO_DB_NAME, MONGO_COLLECTION_NAME
@@ -34,8 +38,8 @@ class DatabaseManager:
         self._init_mongo()
 
     def _init_mongo(self):
+        """Initializes connection to MongoDB with timeout."""
         try:
-            # Set short timeout so connection attempt is swift
             self.client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=1500)
             self.client.admin.command('ping')
             self.db = self.client[MONGO_DB_NAME]
@@ -44,27 +48,29 @@ class DatabaseManager:
             print(
                 f"[Database] Connected to live MongoDB at {MONGO_URI} (DB: {MONGO_DB_NAME})"
             )
-        except (ConnectionFailure, ServerSelectionTimeoutError, Exception) as e:
+        except (ConnectionFailure, ServerSelectionTimeoutError, PyMongoError) as err:
             self.is_mongo_active = False
             print(
-                f"[Database] MongoDB offline ({e}). Operating in Local Resilient Fallback Mode."
+                f"[Database] MongoDB offline ({err}). Operating in Local Resilient Fallback Mode."
             )
 
     def _read_fallback(self) -> list:
+        """Reads stored predictions from local JSON file."""
         if not os.path.exists(FALLBACK_FILE):
             return []
         try:
-            with open(FALLBACK_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
+            with open(FALLBACK_FILE, "r", encoding="utf-8") as file:
+                return json.load(file)
+        except (IOError, OSError, json.JSONDecodeError):
             return []
 
     def _write_fallback(self, data: list):
+        """Writes prediction list to local JSON fallback store."""
         try:
-            with open(FALLBACK_FILE, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2)
-        except Exception as e:
-            print(f"[Database] Error writing local store: {e}")
+            with open(FALLBACK_FILE, "w", encoding="utf-8") as file:
+                json.dump(data, file, indent=2)
+        except (IOError, OSError) as err:
+            print(f"[Database] Error writing local store: {err}")
 
     def save_prediction(self, record: dict) -> dict:
         """
@@ -79,17 +85,14 @@ class DatabaseManager:
 
         if self.is_mongo_active:
             try:
-                # Insert into MongoDB
                 insert_doc = dict(record)
                 self.collection.insert_one(insert_doc)
-                # Remove MongoDB _id before returning clean record
                 insert_doc.pop("_id", None)
                 return insert_doc
-            except Exception as e:
-                print(f"[Database] MongoDB insert failed ({e}), falling back to local file.")
+            except PyMongoError as err:
+                print(f"[Database] MongoDB insert failed ({err}), falling back to local file.")
                 self.is_mongo_active = False
 
-        # Fallback local store
         records = self._read_fallback()
         records.insert(0, record)
         self._write_fallback(records[:200])  # Keep latest 200 records
@@ -102,8 +105,8 @@ class DatabaseManager:
                 cursor = self.collection.find({}, {"_id": 0})
                 docs = list(cursor.sort("created_at", DESCENDING).limit(limit))
                 return docs
-            except Exception as e:
-                print(f"[Database] MongoDB query failed ({e}), using local file.")
+            except PyMongoError as err:
+                print(f"[Database] MongoDB query failed ({err}), using local file.")
                 self.is_mongo_active = False
 
         records = self._read_fallback()
@@ -117,10 +120,9 @@ class DatabaseManager:
                 res = self.collection.delete_one({"prediction_id": prediction_id})
                 if res.deleted_count > 0:
                     deleted = True
-            except Exception as e:
-                print(f"[Database] MongoDB delete failed ({e})")
+            except PyMongoError as err:
+                print(f"[Database] MongoDB delete failed ({err})")
 
-        # Also remove from local fallback if present
         records = self._read_fallback()
         new_records = [r for r in records if r.get("prediction_id") != prediction_id]
         if len(new_records) < len(records):
@@ -130,14 +132,14 @@ class DatabaseManager:
         return deleted
 
     def clear_all(self) -> int:
-        """Clears all records."""
+        """Clears all records from MongoDB and local fallback."""
         count = 0
         if self.is_mongo_active:
             try:
                 res = self.collection.delete_many({})
                 count += res.deleted_count
-            except Exception as e:
-                print(f"[Database] MongoDB clear failed ({e})")
+            except PyMongoError as err:
+                print(f"[Database] MongoDB clear failed ({err})")
 
         records = self._read_fallback()
         count += len(records)
