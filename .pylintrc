@@ -1,0 +1,8 @@
+[MAIN]
+extension-pkg-allow-list=cv2,numpy,torch
+extension-pkg-whitelist=cv2,numpy,torch
+
+[MESSAGES CONTROL]
+disable=
+    no-member,
+    c-extension-no-member
