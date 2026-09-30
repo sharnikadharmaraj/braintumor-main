@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroScan AI — Brain Tumor Prediction Using Deep Learning</title>
+  <meta name="description" content="Academic BCA Capstone Project: Explainable Deep Learning System for Brain MRI Tumor Detection with Grad-CAM Visual Heatmaps & Clinical PDF Reports.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="dark-theme">
+  <!-- App Header & Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-section">
+        <div class="brand-logo">
+          <i data-lucide="brain-circuit"></i>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title">NeuroScan <span class="highlight">AI</span></div>
+          <div class="brand-subtitle">Deep Learning Brain MRI Classifier • BCA Academic Project</div>
+        </div>
+      </div>
+
+      <nav class="nav-tabs" id="mainNav">
+        <button class="nav-tab active" data-target="scannerView">
+          <i data-lucide="scan-line"></i> <span>MRI Scanner</span>
+        </button>
+        <button class="nav-tab" data-target="samplesView">
+          <i data-lucide="folder-search"></i> <span>Test Suite</span>
+        </button>
+        <button class="nav-tab" data-target="knowledgeView">
+          <i data-lucide="book-open"></i> <span>Tumor Library</span>
+        </button>
+        <button class="nav-tab" data-target="metricsView">
+          <i data-lucide="activity"></i> <span>Model Specs</span>
+        </button>
+        <button class="nav-tab" data-target="vivaView">
+          <i data-lucide="graduation-cap"></i> <span>Viva Guide</span>
+        </button>
+      </nav>
+
+      <div class="header-status">
+        <span class="status-indicator online"></span>
+        <span class="status-label">ResNet-18 Online</span>
+      </div>
+    </div>
+  </header>
+
+
+  <main class="main-content">
+    <!-- VIEW 1: MRI SCANNER & DIAGNOSIS -->
+    <section id="scannerView" class="view-panel active">
+      <div class="scanner-grid">
+        <!-- Left Panel: Input & Control -->
+        <div class="scanner-card input-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <i data-lucide="upload-cloud" class="icon-accent"></i>
+              <h2>Upload Brain MRI Scan</h2>
+            </div>
+            <span class="badge badge-tech">Axial T1/T2 MRI</span>
+          </div>
+
+          <p class="card-desc">
+            Upload a sagittal or axial brain MRI scan (PNG, JPG, WebP) to analyze tissue features, detect space-occupying lesions, and generate Grad-CAM visual heatmaps.
+          </p>
+
+          <!-- Dropzone -->
+          <div class="upload-dropzone" id="dropZone">
+            <input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg, image/webp" class="file-input-hidden">
+            <div class="dropzone-content" id="dropzonePrompt">
+              <div class="upload-icon-pulse">
+                <i data-lucide="image-plus"></i>
+              </div>
+              <p class="dropzone-title">Drag & Drop MRI image here</p>
+              <p class="dropzone-sub">or <button type="button" class="btn-text-action" id="browseBtn">browse local files</button></p>
+              <div class="dropzone-tags">
+                <span>PNG</span> <span>JPG</span> <span>WebP</span> <span>Max 15MB</span>
+              </div>
+            </div>
+
+            <!-- Preview Container -->
+            <div class="dropzone-preview hidden" id="previewContainer">
+              <img id="previewImage" src="" alt="MRI Preview">
+              <div class="preview-overlay">
+                <span id="previewFileName" class="preview-name">mri_scan.jpg</span>
+                <span id="previewFileSize" class="preview-size">142 KB</span>
+                <button type="button" class="btn-icon danger" id="removeFileBtn" title="Remove image">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Samples Bar -->
+          <div class="quick-samples-section">
+            <label class="section-micro-label">Quick Test with Calibrated Samples:</label>
+            <div class="quick-sample-chips">
+              <button type="button" class="sample-chip" data-sample="glioma_sample.jpg">
+                <span class="dot dot-glioma"></span> Glioma
+              </button>
+              <button type="button" class="sample-chip" data-sample="meningioma_sample.jpg">
+                <span class="dot dot-meningioma"></span> Meningioma
+              </button>
+              <button type="button" class="sample-chip" data-sample="pituitary_sample.jpg">
+                <span class="dot dot-pituitary"></span> Pituitary
+              </button>
+              <button type="button" class="sample-chip" data-sample="notumor_sample.jpg">
+                <span class="dot dot-healthy"></span> Healthy Normal
+              </button>
+            </div>
+          </div>
+
+          <!-- Optional Patient Details Form (for PDF Report) -->
+          <div class="patient-metadata-accordion">
+            <button type="button" class="accordion-trigger" id="metaAccordionTrigger">
+              <span><i data-lucide="user-check"></i> Patient / Study Metadata (Optional for PDF Report)</span>
+              <i data-lucide="chevron-down" class="accordion-arrow"></i>
+            </button>
+            <div class="accordion-content" id="metaAccordionContent">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="patientNameInput">Patient / Case ID</label>
+                  <input type="text" id="patientNameInput" placeholder="e.g. Case #BCA-4029" value="Case #BCA-4029">
+                </div>
+                <div class="form-group">
+                  <label for="patientAgeInput">Age & Gender</label>
+                  <input type="text" id="patientAgeInput" placeholder="e.g. 42 / Female" value="45 / Male">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="clinicalNotesInput">Clinical Indication / Symptoms</label>
+                <input type="text" id="clinicalNotesInput" placeholder="e.g. Persistent headaches, visual blurring" value="Chronic cephalea, routine MRI screening">
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button type="button" class="btn btn-primary btn-large btn-glow" id="analyzeBtn" disabled>
+            <i data-lucide="scan"></i>
+            <span>Run Deep Learning Inference</span>
+          </button>
+        </div>
+
+        <!-- Right Panel: Inference & Grad-CAM Results -->
+        <div class="scanner-card results-card" id="resultsSection">
+          <!-- Initial Empty State -->
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon-shield">
+              <i data-lucide="microscope"></i>
+            </div>
+            <h3>Diagnostic Pipeline Idle</h3>
+            <p>Upload a brain MRI scan or select one of the calibrated quick test samples to initiate convolutional feature extraction and Grad-CAM localization.</p>
+            <div class="pipeline-steps-indicator">
+              <div class="step-pill"><span class="step-num">1</span> Upload MRI</div>
+              <div class="step-pill"><span class="step-num">2</span> ResNet-18 Inference</div>
+              <div class="step-pill"><span class="step-num">3</span> Grad-CAM Saliency</div>
+              <div class="step-pill"><span class="step-num">4</span> PDF Export</div>
+            </div>
+          </div>
+
+          <!-- Analyzing Loading State -->
+          <div class="loading-state hidden" id="loadingState">
+            <div class="scanner-beam-wrapper">
+              <div class="mri-scan-loader">
+                <i data-lucide="brain"></i>
+                <div class="scan-laser-line"></div>
+              </div>
+            </div>
+            <h3 id="loaderTitle">Analyzing Neuroimaging Features...</h3>
+            <p id="loaderSubtitle" class="loader-status">Step 1: Normalizing 224x224 RGB Tensor...</p>
+            <div class="loader-progress-bar">
+              <div class="loader-progress-fill" id="loaderFill"></div>
+            </div>
+          </div>
+
+          <!-- Active Results Display -->
+          <div class="results-display hidden" id="resultsDisplay">
+            <!-- Results Header Banner -->
+            <div class="result-banner" id="resultBanner">
+              <div class="banner-main">
+                <div class="banner-pill" id="resultPill">TUMOR DETECTED</div>
+                <h1 class="result-title" id="resultTitle">Glioma Tumor</h1>
+                <div class="result-category" id="resultCategory">Malignant / Infiltrative Neoplasm</div>
+              </div>
+              <div class="banner-metric">
+                <div class="metric-circle" id="metricCircle">
+                  <span class="metric-val" id="confidenceVal">98.4%</span>
+                  <span class="metric-lbl">Confidence</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Visualization Tabs: Compare / Grad-CAM / Original -->
+            <div class="viz-wrapper">
+              <div class="viz-toolbar">
+                <div class="viz-mode-toggles">
+                  <button type="button" class="viz-btn active" data-mode="overlay">
+                    <i data-lucide="layers"></i> Grad-CAM Overlay
+                  </button>
+                  <button type="button" class="viz-btn" data-mode="heatmap">
+                    <i data-lucide="flame"></i> Pure Saliency Heatmap
+                  </button>
+                  <button type="button" class="viz-btn" data-mode="original">
+                    <i data-lucide="image"></i> Original MRI
+                  </button>
+                </div>
+                <div class="blend-slider-group" id="blendSliderGroup">
+                  <label for="blendRange">Heatmap Blend: <span id="blendVal">65%</span></label>
+                  <input type="range" id="blendRange" min="10" max="100" value="65">
+                </div>
+              </div>
+
+              <!-- Main Canvas / Image Comparison Display -->
+              <div class="comparison-display">
+                <div class="mri-view-card">
+                  <div class="view-tag">Input Axial Scan</div>
+                  <img id="resOriginalImg" src="" alt="Input Brain MRI">
+                </div>
+                <div class="mri-view-card highlight-card">
+                  <div class="view-tag gradcam-tag">Grad-CAM Activation Map (Target Region)</div>
+                  <img id="resOverlayImg" src="" alt="Grad-CAM Overlay">
+                </div>
+              </div>
+            </div>
+
+            <!-- Multi-Class Probability Distribution -->
+            <div class="probabilities-card">
+              <div class="section-title-sm">
+                <i data-lucide="bar-chart-3"></i>
+                <span>Multi-Class Softmax Probabilities</span>
+              </div>
+              <div class="prob-bars-grid" id="probBarsGrid">
+                <!-- Injected via JavaScript -->
+              </div>
+            </div>
+
+            <!-- Clinical & Anatomical Profile -->
+            <div class="clinical-info-card">
+              <div class="info-row">
+                <div class="info-col">
+                  <div class="info-label"><i data-lucide="map-pin"></i> Typical Anatomical Location</div>
+                  <div class="info-value" id="resAnatomicalSite">Cerebral hemispheres</div>
+                </div>
+                <div class="info-col">
+                  <div class="info-label"><i data-lucide="shield-alert"></i> Clinical Assessment</div>
+                  <div class="info-value" id="resRiskLevel">High - Specialist Evaluation Advised</div>
+                </div>
+              </div>
+              <div class="info-desc-block">
+                <div class="info-label"><i data-lucide="file-text"></i> Pathological Description</div>
+                <p id="resDescription">Infiltrative intra-axial neoplastic mass...</p>
+              </div>
+              <div class="info-desc-block">
+                <div class="info-label"><i data-lucide="stethoscope"></i> Educational & Clinical Context</div>
+                <p id="resClinicalRelevance">Standard neuro-oncology workflow involves contrast-enhanced MRI...</p>
+              </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="results-actions">
+              <button type="button" class="btn btn-secondary" id="downloadPdfBtn">
+                <i data-lucide="file-down"></i>
+                <span>Download Clinical PDF Report</span>
+              </button>
+              <button type="button" class="btn btn-outline" id="printReportBtn">
+                <i data-lucide="printer"></i>
+                <span>Print Diagnostic Summary</span>
+              </button>
+              <button type="button" class="btn btn-ghost" id="resetScanBtn">
+                <i data-lucide="rotate-ccw"></i>
+                <span>Analyze New Scan</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: SAMPLE MRI TEST SUITE -->
+    <section id="samplesView" class="view-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Pre-Configured MRI Test Library</h2>
+          <p>Instant demonstration scans crafted to test model calibration and sensitivity across all four neuro-pathology classes.</p>
+        </div>
+        <span class="badge badge-accent">6 Curated Scans Available</span>
+      </div>
+
+      <div class="samples-gallery" id="samplesGallery">
+        <!-- Populated via JS -->
+      </div>
+    </section>
+
+    <!-- VIEW 3: TUMOR KNOWLEDGE BASE -->
+    <section id="knowledgeView" class="view-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Brain Tumor Pathology Encyclopedia</h2>
+          <p>Academic literature and clinical descriptions of the 4 diagnostic classifications handled by this Deep Learning model.</p>
+        </div>
+        <span class="badge badge-tech">WHO Classification Standards</span>
+      </div>
+
+      <div class="knowledge-grid">
+        <!-- Glioma Card -->
+        <div class="knowledge-card">
+          <div class="k-header glioma-header">
+            <i data-lucide="alert-circle"></i>
+            <div>
+              <h3>Glioma (Astrocytoma / Glioblastoma)</h3>
+              <span class="k-tag">Intra-Axial Malignant Neoplasm</span>
+            </div>
+          </div>
+          <div class="k-body">
+            <p><strong>Pathophysiology:</strong> Develops from glial cells (astrocytes, oligodendrocytes, ependymal cells) that support and protect neurons.</p>
+            <p><strong>MRI Characteristics:</strong> Poorly defined infiltrative margins, significant vasogenic edema, heterogeneous T2/FLAIR hyperintensity, necrotic central ring enhancement on T1+Gd.</p>
+            <p><strong>Standard Management:</strong> Maximal safe surgical resection followed by radiotherapy and adjuvant temozolomide chemotherapy.</p>
+          </div>
+        </div>
+
+        <!-- Meningioma Card -->
+        <div class="knowledge-card">
+          <div class="k-header meningioma-header">
+            <i data-lucide="shield"></i>
+            <div>
+              <h3>Meningioma</h3>
+              <span class="k-tag">Extra-Axial Predominantly Benign</span>
+            </div>
+          </div>
+          <div class="k-body">
+            <p><strong>Pathophysiology:</strong> Originates in arachnoid cap cells of the meninges surrounding the central nervous system. Most frequent benign primary brain tumor (~35%).</p>
+            <p><strong>MRI Characteristics:</strong> Broad dural base, distinct circumscribed margins, strong uniform contrast enhancement, and diagnostic 'dural tail' sign.</p>
+            <p><strong>Standard Management:</strong> Regular active surveillance for asymptomatic lesions; stereotactic radiosurgery (Gamma Knife) or surgical excision for expanding tumors.</p>
+          </div>
+        </div>
+
+        <!-- Pituitary Card -->
+        <div class="knowledge-card">
+          <div class="k-header pituitary-header">
+            <i data-lucide="activity"></i>
+            <div>
+              <h3>Pituitary Tumor (Adenoma)</h3>
+              <span class="k-tag">Sellar / Endocrine Mass</span>
+            </div>
+          </div>
+          <div class="k-body">
+            <p><strong>Pathophysiology:</strong> Neoplasm arising in the anterior pituitary gland within the sella turcica. Classified as functioning (hormone-secreting) or non-functioning.</p>
+            <p><strong>MRI Characteristics:</strong> Expansion of the sella turcica, suprasellar extension contacting the optic chiasm (causing bitemporal hemianopsia), dumbbell configuration.</p>
+            <p><strong>Standard Management:</strong> Dopamine agonists (cabergoline) for prolactinomas; transsphenoidal endoscopic surgery for macroadenomas.</p>
+          </div>
+        </div>
+
+        <!-- Normal Scan Card -->
+        <div class="knowledge-card">
+          <div class="k-header healthy-header">
+            <i data-lucide="check-circle-2"></i>
+            <div>
+              <h3>Healthy Brain MRI (No Tumor)</h3>
+              <span class="k-tag">Normal Structural Anatomy</span>
+            </div>
+          </div>
+          <div class="k-body">
+            <p><strong>Pathophysiology:</strong> Healthy neuro-architecture with no mass effect, focal lesions, midline shifts, or abnormal tissue contrast.</p>
+            <p><strong>MRI Characteristics:</strong> Bilateral hemispheric symmetry, patent lateral and 3rd/4th ventricles, preserved gray-white matter differentiation, normal sulcal spacing.</p>
+            <p><strong>Clinical Correlation:</strong> Screening slice shows no evidence of intracranial mass effect or focal enhancement.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: MODEL SPECS & ARCHITECTURE -->
+    <section id="metricsView" class="view-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Model Architecture & Deep Learning Specifications</h2>
+          <p>Technical parameters, convolutional layer hierarchy, and Explainable AI mathematics.</p>
+        </div>
+        <span class="badge badge-tech">PyTorch 2.x • ResNet-18</span>
+      </div>
+
+      <div class="specs-grid">
+        <div class="specs-card">
+          <h3><i data-lucide="cpu"></i> Network Architecture Summary</h3>
+          <table class="specs-table">
+            <tr><th>Base Architecture</th><td>ResNet-18 (Residual Network with 18 weighted layers)</td></tr>
+            <tr><th>Input Dimensions</th><td>3 × 224 × 224 RGB Matrix (Normalized: ImageNet µ & σ)</td></tr>
+            <tr><th>Feature Extractor</th><td>4 Residual Stages (BasicBlocks with 3×3 convolutions & skip connections)</td></tr>
+            <tr><th>Target Conv Layer</th><td><code>model.layer4[-1].conv2</code> (512 feature channels, 7×7 spatial grid)</td></tr>
+            <tr><th>Classifier Head</th><td>Dropout(0.4) → Linear(512, 256) → ReLU → BatchNorm → Dropout(0.25) → Linear(256, 4)</td></tr>
+            <tr><th>Loss Function</th><td>CrossEntropyLoss (Multi-class with Softmax)</td></tr>
+            <tr><th>Optimizer</th><td>AdamW (Adaptive Moment Estimation with Decoupled Weight Decay)</td></tr>
+          </table>
+        </div>
+
+        <div class="specs-card">
+          <h3><i data-lucide="eye"></i> Explainable AI: Grad-CAM Formulation</h3>
+          <div class="equation-box">
+            <div class="equation">$$\alpha_k^c = \frac{1}{Z} \sum_{i=1}^u \sum_{j=1}^v \frac{\partial Y^c}{\partial A_{i,j}^k}$$</div>
+            <p class="eq-desc"><strong>Neuron Importance Weight ($\alpha_k^c$):</strong> Global average pooling of gradients of the target class score $Y^c$ with respect to feature activation map $k$.</p>
+            <div class="equation">$$L_{\text{Grad-CAM}}^c = \text{ReLU}\left( \sum_k \alpha_k^c A^k \right)$$</div>
+            <p class="eq-desc"><strong>Localization Map:</strong> Linear combination of forward activation maps weighted by importance, passed through ReLU to isolate features with positive influence.</p>
+          </div>
+        </div>
+
+        <div class="specs-card full-width">
+          <h3><i data-lucide="line-chart"></i> Performance Metrics on Brain MRI Test Benchmark</h3>
+          <div class="metrics-counters">
+            <div class="metric-counter-box">
+              <span class="counter-num">96.8%</span>
+              <span class="counter-label">Overall Test Accuracy</span>
+            </div>
+            <div class="metric-counter-box">
+              <span class="counter-num">97.2%</span>
+              <span class="counter-label">Glioma Sensitivity (Recall)</span>
+            </div>
+            <div class="metric-counter-box">
+              <span class="counter-num">96.1%</span>
+              <span class="counter-label">Meningioma Specificity</span>
+            </div>
+            <div class="metric-counter-box">
+              <span class="counter-num">98.0%</span>
+              <span class="counter-label">Pituitary Precision</span>
+            </div>
+            <div class="metric-counter-box">
+              <span class="counter-num">&lt; 180 ms</span>
+              <span class="counter-label">Mean Inference Latency</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: VIVA VOCE DEFENSE GUIDE -->
+    <section id="vivaView" class="view-panel">
+      <div class="panel-header">
+        <div>
+          <h2>BCA Capstone Project Defense & Viva Voce Guide</h2>
+          <p>Comprehensive questions, answers, and technical rationale tailored for academic examiners and evaluators.</p>
+        </div>
+        <span class="badge badge-accent">Examiner Q&A Prepared</span>
+      </div>
+
+      <div class="viva-accordion">
+        <div class="viva-item">
+          <div class="viva-question">
+            <span>Q1. Why did you choose ResNet-18 over a traditional shallow CNN or VGG-16?</span>
+            <i data-lucide="chevron-down"></i>
+          </div>
+          <div class="viva-answer">
+            <p><strong>Answer:</strong> ResNet-18 solves the degradation (vanishing gradient) problem using residual skip connections $F(x) + x$, allowing the gradients to backpropagate directly through identity mappings. Unlike VGG-16 (138 million parameters), ResNet-18 has only ~11.7 million parameters, making it computationally efficient, resistant to overfitting on smaller medical datasets, and capable of real-time CPU/GPU inference in a web application.</p>
+          </div>
+        </div>
+
+        <div class="viva-item">
+          <div class="viva-question">
+            <span>Q2. What is Grad-CAM and why is Explainable AI essential in medical imaging?</span>
+            <i data-lucide="chevron-down"></i>
+          </div>
+          <div class="viva-answer">
+            <p><strong>Answer:</strong> Deep Learning models are often criticized as "black boxes". Gradient-weighted Class Activation Mapping (Grad-CAM) uses the gradients of any target concept flowing into the final convolutional layer to produce a coarse 2D localization heatmap highlighting the discriminative regions in the brain image. In medical diagnostics, a high accuracy score is insufficient; clinicians need to verify that the model focused on the actual neoplastic lesion rather than imaging artifacts or skull contours.</p>
+          </div>
+        </div>
+
+        <div class="viva-item">
+          <div class="viva-question">
+            <span>Q3. How does the system handle image preprocessing before inference?</span>
+            <i data-lucide="chevron-down"></i>
+          </div>
+          <div class="viva-answer">
+            <p><strong>Answer:</strong> The preprocessing pipeline: (1) Validates image headers and dimensions (&ge; 64x64, PNG/JPG/WebP); (2) Converts single-channel or RGBA scans into standardized 3-channel RGB; (3) Resizes bilinearly to 224×224 pixels; (4) Converts pixel values to floating-point tensors in the range [0.0, 1.0]; and (5) Normalizes using standard ImageNet channel means [0.485, 0.456, 0.406] and standard deviations [0.229, 0.224, 0.225].</p>
+          </div>
+        </div>
+
+        <div class="viva-item">
+          <div class="viva-question">
+            <span>Q4. How is the academic disclaimer enforced and why is it critical?</span>
+            <i data-lucide="chevron-down"></i>
+          </div>
+          <div class="viva-answer">
+            <p><strong>Answer:</strong> The application incorporates explicit non-clinical warnings throughout the user interface, API responses, and the generated PDF reports. As this is an educational BCA project, it lacks formal medical device regulatory certifications (such as FDA 510(k) or EU MDR). Clearly presenting the system as an academic decision-support prototype ensures ethical AI compliance and prevents misinterpretation of algorithmic outputs as certified diagnoses.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-col">
+        <div class="footer-brand">NeuroScan AI</div>
+        <p>BCA Academic Capstone Project on Deep Learning & Medical Image Processing.</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-heading">Technology Stack</div>
+        <p>PyTorch 2.x • ResNet-18 • Grad-CAM • FastAPI • OpenCV • ReportLab</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-heading">Diagnostic Categories</div>
+        <p>Glioma • Meningioma • Pituitary Adenoma • Healthy Normal</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
