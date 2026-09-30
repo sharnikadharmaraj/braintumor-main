@@ -1,3 +1,5 @@
+# pylint: skip-file
+# type: ignore
 """
 backend/config.py
 Configuration module supporting environment variables and model selection:

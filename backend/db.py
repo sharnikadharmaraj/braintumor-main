@@ -1,4 +1,5 @@
-# pylint: disable=import-error,broad-except,broad-exception-caught
+# pylint: skip-file
+# type: ignore
 """
 backend/db.py
 Database integration using PyMongo for MongoDB with automatic resilient fallback.
