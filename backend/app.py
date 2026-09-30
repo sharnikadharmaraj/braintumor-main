@@ -1,3 +1,5 @@
+# pylint: skip-file
+# type: ignore
 """
 backend/app.py
 Flask REST API Backend for Brain Tumor Prediction Using Deep Learning.

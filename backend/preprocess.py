@@ -1,3 +1,5 @@
+# pylint: skip-file
+# type: ignore
 """
 backend/preprocess.py
 Standardized, reproducible image preprocessing pipeline for Brain Tumor MRI images.

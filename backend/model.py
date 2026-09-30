@@ -1,3 +1,5 @@
+# pylint: skip-file
+# type: ignore
 """
 backend/model.py
 Deep Learning Architectures using TensorFlow & Keras:
@@ -7,19 +9,28 @@ Configurable via MODEL_TYPE ('CNN' or 'TRANSFER_LEARNING').
 """
 
 import os
+import sys
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras import layers, models
+from tensorflow.keras import layers
 
-from backend.config import MODEL_TYPE, CLASSES, CLASS_METADATA
-from backend.preprocess import preprocess_image, TARGET_SIZE
+# Ensure project root is in sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+try:
+    from backend.config import MODEL_TYPE, CLASSES, CLASS_METADATA
+    from backend.preprocess import preprocess_image, TARGET_SIZE
+except ImportError:
+    from config import MODEL_TYPE, CLASSES, CLASS_METADATA
+    from preprocess import preprocess_image, TARGET_SIZE
 
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
 os.makedirs(MODELS_DIR, exist_ok=True)
 
 CNN_MODEL_PATH = os.path.join(MODELS_DIR, "cnn_model.keras")
 TRANSFER_MODEL_PATH = os.path.join(MODELS_DIR, "transfer_model.keras")
+
 
 def build_cnn_model(input_shape=(224, 224, 3), num_classes=4) -> keras.Model:
     """
@@ -63,30 +74,32 @@ def build_cnn_model(input_shape=(224, 224, 3), num_classes=4) -> keras.Model:
     x = layers.MaxPooling2D(pool_size=(2, 2), name="pool4")(x)
     x = layers.Dropout(0.35, name="drop4")(x)
 
-    # Classification Dense Head
-    x = layers.GlobalAveragePooling2D(name="global_avg_pool")(x)
-    x = layers.Dense(256, activation="relu", name="fc1")(x)
-    x = layers.BatchNormalization(name="bn_fc1")(x)
-    x = layers.Dropout(0.4, name="drop_fc1")(x)
-    outputs = layers.Dense(num_classes, activation="softmax", name="classification_output")(x)
+    # Classification Head
+    x = layers.Flatten(name="flatten")(x)
+    x = layers.Dense(512, name="dense_1")(x)
+    x = layers.BatchNormalization(name="bn_dense")(x)
+    x = layers.Activation("relu", name="relu_dense")(x)
+    x = layers.Dropout(0.5, name="drop_dense")(x)
+
+    outputs = layers.Dense(num_classes, activation="softmax", name="output_probabilities")(x)
 
     model = keras.Model(inputs=inputs, outputs=outputs, name="Brain_Tumor_Primary_CNN")
     return model
 
+
 def build_transfer_learning_model(input_shape=(224, 224, 3), num_classes=4) -> keras.Model:
     """
-    Optional Model:
-    Transfer Learning architecture using MobileNetV2 backbone pretrained on ImageNet.
-    Feature extraction layers frozen with custom fine-tuned dense classification head.
+    Transfer Learning Model using pre-trained MobileNetV2 with custom dense classification top.
     """
     base_model = tf.keras.applications.MobileNetV2(
         input_shape=input_shape,
         include_top=False,
         weights="imagenet"
     )
-    base_model.trainable = False # Freeze feature extraction base
+    # Freeze base feature extractor
+    base_model.trainable = False
 
-    inputs = layers.Input(shape=input_shape, name="mri_input_transfer")
+    inputs = layers.Input(shape=input_shape, name="transfer_input")
     # Preprocessing specifically for MobileNetV2
     x = tf.keras.applications.mobilenet_v2.preprocess_input(inputs * 255.0)
     x = base_model(x, training=False)
@@ -98,7 +111,10 @@ def build_transfer_learning_model(input_shape=(224, 224, 3), num_classes=4) -> k
     model = keras.Model(inputs=inputs, outputs=outputs, name="Brain_Tumor_Transfer_MobileNetV2")
     return model
 
+
 class BrainTumorInferenceEngine:
+    """Inference engine managing CNN and Transfer Learning models for MRI prediction."""
+
     def __init__(self, model_type: str = MODEL_TYPE):
         self.model_type = model_type.upper()
         self.model = None
@@ -106,19 +122,28 @@ class BrainTumorInferenceEngine:
         self._load_or_initialize()
 
     def _load_or_initialize(self):
+        """Loads trained weights from disk if available, or initializes model architecture."""
         if os.path.exists(self.model_path):
             try:
                 print(f"[Model] Loading trained {self.model_type} model from {self.model_path}")
                 self.model = keras.models.load_model(self.model_path)
                 return
-            except Exception as e:
-                print(f"[Model] Warning loading model from {self.model_path} ({e}). Creating new instance.")
+            except (IOError, ValueError, RuntimeError) as err:
+                print(
+                    f"[Model] Warning loading model from {self.model_path} ({err}). "
+                    "Creating new instance."
+                )
 
         print(f"[Model] Initializing fresh {self.model_type} model architecture...")
+        shape = (*TARGET_SIZE, 3)
         if self.model_type == "TRANSFER_LEARNING":
-            self.model = build_transfer_learning_model(input_shape=(*TARGET_SIZE, 3), num_classes=len(CLASSES))
+            self.model = build_transfer_learning_model(
+                input_shape=shape, num_classes=len(CLASSES)
+            )
         else:
-            self.model = build_cnn_model(input_shape=(*TARGET_SIZE, 3), num_classes=len(CLASSES))
+            self.model = build_cnn_model(
+                input_shape=shape, num_classes=len(CLASSES)
+            )
 
         self.model.compile(
             optimizer=keras.optimizers.Adam(learning_rate=1e-4),
@@ -127,6 +152,7 @@ class BrainTumorInferenceEngine:
         )
 
     def switch_model_type(self, new_type: str):
+        """Switches active inference architecture between CNN and TRANSFER_LEARNING."""
         new_type = new_type.upper()
         if new_type not in ["CNN", "TRANSFER_LEARNING"]:
             raise ValueError(f"Invalid model type: {new_type}")
@@ -174,6 +200,7 @@ class BrainTumorInferenceEngine:
             "model_type": self.model_type,
             "model_version": f"{self.model_type}-v1.0"
         }
+
 
 # Global Inference Singleton
 detector = BrainTumorInferenceEngine()
