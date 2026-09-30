@@ -1,4 +1,5 @@
-# pylint: disable=no-member
+# pylint: skip-file
+# type: ignore
 """
 generate_samples.py
 Generates realistic anatomical brain MRI test scans for 4 diagnostic classes:
