@@ -1,12 +1,12 @@
 import React from 'react';
-import { BrainCircuit, Activity, History, FolderSearch, BarChart2, ShieldCheck, Database } from 'lucide-react';
+import { BrainCircuit, Activity, History, FolderSearch, BarChart2, Database, BookOpen, UserCheck } from 'lucide-react';
 
-export default function Navbar({ activeTab, setActiveTab, config, onSwitchModel }) {
+export default function Navbar({ activeTab, setActiveTab, config, onSwitchModel, userProfile, onOpenUserProfile }) {
   const isMongoLive = config?.database_status?.is_mongo_connected;
 
   return (
-    <header className="sticky top-0 z-50 bg-[#0A0D14]/85 backdrop-blur-md border-b border-white/10 px-4 lg:px-8 py-3">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 bg-[#0A0D14]/90 backdrop-blur-md border-b border-white/10 px-4 lg:px-8 py-3">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
         {/* Brand */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/30">
@@ -17,7 +17,7 @@ export default function Navbar({ activeTab, setActiveTab, config, onSwitchModel 
               NeuroScan <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">AI</span>
             </div>
             <div className="text-xs text-slate-400 font-medium">
-              BCA Capstone • Brain Tumor Prediction Deep Learning System
+              Individual Project • Brain Tumor Prediction Deep Learning System
             </div>
           </div>
         </div>
@@ -26,7 +26,7 @@ export default function Navbar({ activeTab, setActiveTab, config, onSwitchModel 
         <nav className="flex items-center bg-white/[0.04] p-1.5 rounded-xl border border-white/10 gap-1 overflow-x-auto max-w-full">
           <button
             onClick={() => setActiveTab('predictor')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all duration-200 whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all duration-200 whitespace-nowrap ${
               activeTab === 'predictor'
                 ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25'
                 : 'text-slate-300 hover:text-white hover:bg-white/5'
@@ -37,32 +37,20 @@ export default function Navbar({ activeTab, setActiveTab, config, onSwitchModel 
           </button>
 
           <button
-            onClick={() => setActiveTab('history')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all duration-200 whitespace-nowrap ${
-              activeTab === 'history'
+            onClick={() => setActiveTab('library')}
+            className={`px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all duration-200 whitespace-nowrap ${
+              activeTab === 'library'
                 ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25'
                 : 'text-slate-300 hover:text-white hover:bg-white/5'
             }`}
           >
-            <History className="w-4 h-4" />
-            <span>Prediction History</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('metrics')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all duration-200 whitespace-nowrap ${
-              activeTab === 'metrics'
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25'
-                : 'text-slate-300 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <BarChart2 className="w-4 h-4" />
-            <span>Model Metrics</span>
+            <BookOpen className="w-4 h-4 text-cyan-400" />
+            <span>Tumor Library</span>
           </button>
 
           <button
             onClick={() => setActiveTab('samples')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all duration-200 whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all duration-200 whitespace-nowrap ${
               activeTab === 'samples'
                 ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25'
                 : 'text-slate-300 hover:text-white hover:bg-white/5'
@@ -71,10 +59,57 @@ export default function Navbar({ activeTab, setActiveTab, config, onSwitchModel 
             <FolderSearch className="w-4 h-4" />
             <span>Test Samples</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all duration-200 whitespace-nowrap ${
+              activeTab === 'history'
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <History className="w-4 h-4" />
+            <span>History</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('metrics')}
+            className={`px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all duration-200 whitespace-nowrap ${
+              activeTab === 'metrics'
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <BarChart2 className="w-4 h-4" />
+            <span>Model Specs</span>
+          </button>
         </nav>
 
-        {/* Status Indicators & Model Switcher */}
-        <div className="flex items-center gap-2.5">
+        {/* User Profile & Status Indicators */}
+        <div className="flex items-center gap-2.5 flex-wrap justify-end">
+          {/* Active Clinician User Button */}
+          <button
+            type="button"
+            onClick={onOpenUserProfile}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#182032] border border-cyan-500/30 hover:border-cyan-400 text-left transition group shadow-sm shadow-cyan-500/10"
+            title="Click to view or edit Active Clinician / Operator specifications"
+          >
+            <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-transform">
+              <UserCheck className="w-3.5 h-3.5" />
+            </div>
+            <div className="leading-tight">
+              <div className="text-[11px] font-bold text-white group-hover:text-cyan-300 transition-colors flex items-center gap-1">
+                <span>{userProfile?.userName?.split(',')[0] || 'Clinician'}</span>
+                <span className="text-[9px] font-mono text-cyan-400 bg-cyan-950 px-1 rounded border border-cyan-500/30">
+                  {userProfile?.userId || 'USR-8421'}
+                </span>
+              </div>
+              <div className="text-[10px] text-slate-400 truncate max-w-[130px]">
+                {userProfile?.role || 'Neuro-Radiologist'}
+              </div>
+            </div>
+          </button>
+
           {/* Model Selector */}
           <div className="flex items-center bg-slate-900 border border-white/10 rounded-lg px-2.5 py-1 text-xs">
             <span className="text-slate-400 mr-2 font-medium">Model:</span>
@@ -83,8 +118,8 @@ export default function Navbar({ activeTab, setActiveTab, config, onSwitchModel 
               onChange={(e) => onSwitchModel(e.target.value)}
               className="bg-transparent text-cyan-400 font-bold focus:outline-none cursor-pointer"
             >
-              <option value="CNN" className="bg-slate-900 text-white">CNN (Primary)</option>
-              <option value="TRANSFER_LEARNING" className="bg-slate-900 text-white">Transfer Learning (MobileNetV2)</option>
+              <option value="CNN" className="bg-slate-900 text-white">ResNet-18 (CNN)</option>
+              <option value="TRANSFER_LEARNING" className="bg-slate-900 text-white">MobileNetV2 (Transfer)</option>
             </select>
           </div>
 

@@ -8,7 +8,6 @@ import io
 import base64
 from datetime import datetime
 import numpy as np
-import cv2
 from PIL import Image
 
 from reportlab.lib.pagesizes import letter
@@ -19,13 +18,13 @@ from reportlab.platypus import (
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 
-def numpy_to_base64(img_np, format="PNG"):
+def numpy_to_base64(img_np, img_format="PNG"):
     """Converts a numpy RGB image array into a base64 Data URI."""
     pil_img = Image.fromarray(img_np.astype(np.uint8))
     buffered = io.BytesIO()
-    pil_img.save(buffered, format=format)
+    pil_img.save(buffered, format=img_format)
     img_b64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
-    return f"data:image/{format.lower()};base64,{img_b64}"
+    return f"data:image/{img_format.lower()};base64,{img_b64}"
 
 def validate_image_file(contents: bytes):
     """
@@ -61,11 +60,18 @@ def generate_pdf_report(
     patient_name: str = "Anonymous Patient / Test Scan",
     patient_age: str = "N/A",
     patient_gender: str = "N/A",
-    clinical_notes: str = "Standard axial brain MRI screening"
+    clinical_notes: str = "Standard axial brain MRI screening",
+    user_id: str = "USR-8421",
+    user_name: str = "Dr. Sarah Mitchell, MD",
+    user_role: str = "Neuro-Oncology Radiologist",
+    user_department: str = "Advanced Neuroimaging Unit",
+    patient_id: str = "PT-40291",
+    patient_blood_group: str = "O+",
+    referring_physician: str = "Dr. Robert Hayes, MD"
 ) -> bytes:
     """
     Generates an official-looking, academic clinical diagnostic report PDF
-    complete with MRI visuals, Grad-CAM heatmap, metrics, and academic disclaimer.
+    complete with MRI visuals, Grad-CAM heatmap, user specifications, patient details, and research disclaimer.
     """
     pdf_buffer = io.BytesIO()
     doc = SimpleDocTemplate(
@@ -110,6 +116,15 @@ def generate_pdf_report(
         spaceAfter=4
     )
 
+    meta_header_style = ParagraphStyle(
+        'MetaHeader',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=8,
+        leading=11,
+        textColor=colors.HexColor('#1E3A8A')
+    )
+
     body_style = ParagraphStyle(
         'Body',
         parent=styles['Normal'],
@@ -138,33 +153,46 @@ def generate_pdf_report(
 
     # 1. Title Banner
     elements.append(Paragraph("NEUROSCAN AI — DEEP LEARNING DIAGNOSTIC REPORT", header_style))
-    elements.append(Paragraph("Academic BCA Capstone Project • Brain Tumor Classification & Explainable AI (Grad-CAM)", subhead_style))
+    elements.append(Paragraph("Individual Project • Brain Tumor Classification & Explainable AI (Grad-CAM)", subhead_style))
     elements.append(Spacer(1, 8))
     elements.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#2563EB'), spaceAfter=10))
 
-    # 2. Metadata Box
+    # 2. Metadata Box: Patient & User Specifications
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     meta_data = [
         [
-            Paragraph(f"<b>Scan ID:</b> {scan_id}", body_style),
-            Paragraph(f"<b>Date/Time:</b> {now_str}", body_style)
+            Paragraph("<b>PATIENT DEMOGRAPHICS & CLINICAL SPECIFICATIONS</b>", meta_header_style),
+            Paragraph("<b>EVALUATING CLINICIAN / USER DETAILS</b>", meta_header_style)
         ],
         [
-            Paragraph(f"<b>Subject / Case:</b> {patient_name}", body_style),
-            Paragraph(f"<b>Age / Sex:</b> {patient_age} / {patient_gender}", body_style)
+            Paragraph(f"<b>Patient ID:</b> {patient_id}", body_style),
+            Paragraph(f"<b>User / Operator ID:</b> {user_id}", body_style)
         ],
         [
-            Paragraph(f"<b>Modalities:</b> Axial MRI Brain (T1/T2)", body_style),
-            Paragraph(f"<b>Clinical Indication:</b> {clinical_notes}", body_style)
+            Paragraph(f"<b>Patient Name:</b> {patient_name}", body_style),
+            Paragraph(f"<b>Evaluator:</b> {user_name}", body_style)
+        ],
+        [
+            Paragraph(f"<b>Age / Sex / Blood:</b> {patient_age} / {patient_gender} ({patient_blood_group})", body_style),
+            Paragraph(f"<b>Role / Title:</b> {user_role}", body_style)
+        ],
+        [
+            Paragraph(f"<b>Ref. Physician:</b> {referring_physician}", body_style),
+            Paragraph(f"<b>Department:</b> {user_department}", body_style)
+        ],
+        [
+            Paragraph(f"<b>Clinical Indication:</b> {clinical_notes}", body_style),
+            Paragraph(f"<b>Scan ID:</b> {scan_id} &nbsp;|&nbsp; <b>Date:</b> {now_str}", body_style)
         ]
     ]
-    meta_table = Table(meta_data, colWidths=[260, 280])
+    meta_table = Table(meta_data, colWidths=[270, 270])
     meta_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#F8FAFC')),
-        ('BOX', (0,0), (-1,-1), 1, colors.HexColor('#E2E8F0')),
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#EFF6FF')),
+        ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#F8FAFC')),
+        ('BOX', (0,0), (-1,-1), 1, colors.HexColor('#CBD5E1')),
         ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor('#E2E8F0')),
-        ('TOPPADDING', (0,0), (-1,-1), 5),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
+        ('TOPPADDING', (0,0), (-1,-1), 4),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
         ('LEFTPADDING', (0,0), (-1,-1), 8),
         ('RIGHTPADDING', (0,0), (-1,-1), 8),
     ]))
@@ -173,8 +201,7 @@ def generate_pdf_report(
 
     # 3. Model Analysis & Classification Result
     elements.append(Paragraph("1. Deep Learning Classification Findings", section_heading))
-    
-    pred_cls = prediction_data.get("predicted_class", "unknown")
+
     disp_name = prediction_data.get("display_name", "Unknown")
     confidence = prediction_data.get("confidence", 0.0)
     risk_level = prediction_data.get("risk_level", "Unknown")
@@ -195,7 +222,7 @@ def generate_pdf_report(
         ],
         [
             Paragraph(f"<b>Anatomical Region:</b> {prediction_data.get('anatomical_site', 'N/A')}", body_style),
-            Paragraph(f"<b>Architecture:</b> ResNet-18 Transfer Learning CNN", body_style)
+            Paragraph("<b>Architecture:</b> ResNet-18 Transfer Learning CNN", body_style)
         ]
     ]
     result_table = Table(result_data, colWidths=[270, 270])
@@ -278,13 +305,13 @@ def generate_pdf_report(
     elements.append(action_p)
     elements.append(Spacer(1, 12))
 
-    # 7. Academic Disclaimer Box (Crucial for BCA Capstone project)
+    # 7. Research Disclaimer Box
     disclaimer_box = [
         [
             Paragraph(
-                "<b>ACADEMIC & RESEARCH DISCLAIMER:</b><br/>"
+                "<b>RESEARCH & DEMONSTRATION DISCLAIMER:</b><br/>"
                 "This report was generated autonomously by an experimental Deep Learning Computer Vision model "
-                "developed for an academic Bachelor of Computer Applications (BCA) capstone project. "
+                "developed as an individual research and software project. "
                 "This application is <b>strictly non-diagnostic and for demonstration purposes only</b>. "
                 "It has not undergone clinical certification (FDA/CE/MDR) and must NEVER be used as a substitute "
                 "for a qualified radiologist's or neurosurgeon's clinical evaluation. In case of real medical symptoms, "

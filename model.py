@@ -12,7 +12,7 @@ Diagnostic Classes:
 
 import os
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 from torchvision import models, transforms
 import numpy as np
@@ -66,7 +66,7 @@ class BrainTumorCNN(nn.Module):
     Configured with a custom classification head and hooks for Grad-CAM.
     """
     def __init__(self, num_classes=4, pretrained=False):
-        super(BrainTumorCNN, self).__init__()
+        super().__init__()
         # Load ResNet-18 backbone
         weights = models.ResNet18_Weights.DEFAULT if pretrained else None
         self.backbone = models.resnet18(weights=weights)
@@ -83,10 +83,11 @@ class BrainTumorCNN(nn.Module):
         )
 
     def forward(self, x):
+        """Forward pass through ResNet-18 backbone."""
         return self.backbone(x)
 
     def get_target_layer(self):
-        # Target the final residual convolutional block for Grad-CAM
+        """Target the final residual convolutional block for Grad-CAM."""
         return self.backbone.layer4[-1].conv2
 
 
@@ -103,16 +104,17 @@ class GradCAM:
         self._register_hooks()
 
     def _register_hooks(self):
-        def forward_hook(module, input, output):
+        def forward_hook(_module, _inputs, output):
             self.activations = output.detach()
 
-        def backward_hook(module, grad_in, grad_out):
+        def backward_hook(_module, _grad_in, grad_out):
             self.gradients = grad_out[0].detach()
 
         self.target_layer.register_forward_hook(forward_hook)
         self.target_layer.register_full_backward_hook(backward_hook)
 
     def generate_cam(self, input_tensor, target_class_idx):
+        """Generates Grad-CAM activation heatmap for a target class."""
         self.model.eval()
         self.model.zero_grad()
 
@@ -129,8 +131,8 @@ class GradCAM:
         
         # Weight the activation channels
         activations = self.activations[0] # [channels, height, width]
-        for i in range(len(pooled_gradients)):
-            activations[i, :, :] *= pooled_gradients[i]
+        for i, weight in enumerate(pooled_gradients):
+            activations[i, :, :] *= weight
 
         # Heatmap calculation
         heatmap = torch.mean(activations, dim=0).cpu().numpy()
@@ -173,6 +175,11 @@ class BrainTumorClassifier:
         if os.path.exists(self.model_path):
             try:
                 state_dict = torch.load(self.model_path, map_location=self.device)
+                # Convert any half-precision (float16) weights to float32 for CPU/CUDA inference
+                state_dict = {
+                    k: (v.float() if v.is_floating_point() else v)
+                    for k, v in state_dict.items()
+                }
                 self.model.load_state_dict(state_dict)
                 print(f"Loaded existing model weights from {self.model_path}")
                 return
@@ -255,8 +262,13 @@ class BrainTumorClassifier:
                 optimizer.step()
 
         self.model.eval()
-        torch.save(self.model.state_dict(), self.model_path)
-        print(f"Model calibrated and weights saved to {self.model_path}")
+        # Save weights in FP16 (half-precision) to ensure model file size is strictly < 25 MB (~21.6 MB)
+        half_state_dict = {
+            k: (v.half() if v.is_floating_point() else v)
+            for k, v in self.model.state_dict().items()
+        }
+        torch.save(half_state_dict, self.model_path)
+        print(f"Model calibrated and weights saved to {self.model_path} (size < 25 MB)")
 
     def _numpy_to_tensor(self, arr):
         uint8_arr = (np.clip(arr, 0, 1) * 255).astype(np.uint8)

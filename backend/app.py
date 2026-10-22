@@ -151,6 +151,23 @@ def predict():
         # Generate base64 thumbnail for history preview
         thumbnail_b64 = f"data:image/jpeg;base64,{base64.b64encode(image_bytes).decode('utf-8')}"
 
+        # Patient and Clinician/User Specifications
+        patient_meta = {
+            "patient_id": request.form.get("patient_id", "PID-40291"),
+            "patient_name": request.form.get("patient_name", "Anonymous Patient"),
+            "patient_age": request.form.get("patient_age", "45"),
+            "patient_gender": request.form.get("patient_gender", "Female"),
+            "patient_blood_group": request.form.get("patient_blood_group", "O+"),
+            "referring_physician": request.form.get("referring_physician", "Dr. Robert Hayes, MD"),
+            "clinical_notes": request.form.get("clinical_notes", "Axial MRI Study")
+        }
+        user_meta = {
+            "user_id": request.form.get("user_id", "USR-8421"),
+            "user_name": request.form.get("user_name", "Dr. Sarah Mitchell, MD"),
+            "user_role": request.form.get("user_role", "Neuro-Oncology Radiologist"),
+            "user_department": request.form.get("user_department", "Radiodiagnosis & Neuro-Oncology")
+        }
+
         # Save record in MongoDB / PyMongo
         history_record = {
             "filename": filename,
@@ -161,7 +178,9 @@ def predict():
             "risk_level": result["risk_level"],
             "model_version": result["model_version"],
             "model_type": result["model_type"],
-            "image_preview": thumbnail_b64
+            "image_preview": thumbnail_b64,
+            "patient_details": patient_meta,
+            "user_details": user_meta
         }
         saved_record = db.save_prediction(history_record)
 
@@ -170,7 +189,9 @@ def predict():
             "prediction_id": saved_record.get("prediction_id"),
             "created_at": saved_record.get("created_at"),
             "filename": filename,
-            "image_preview": thumbnail_b64
+            "image_preview": thumbnail_b64,
+            "patient_details": patient_meta,
+            "user_details": user_meta
         }
         return jsonify(response_payload)
 

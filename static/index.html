@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NeuroScan AI — Brain Tumor Prediction Using Deep Learning</title>
-  <meta name="description" content="Academic BCA Capstone Project: Explainable Deep Learning System for Brain MRI Tumor Detection with Grad-CAM Visual Heatmaps & Clinical PDF Reports.">
+  <meta name="description" content="Individual Project: Explainable Deep Learning System for Brain MRI Tumor Detection with Grad-CAM Visual Heatmaps & Clinical PDF Reports.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -22,7 +22,7 @@
         </div>
         <div class="brand-text">
           <div class="brand-title">NeuroScan <span class="highlight">AI</span></div>
-          <div class="brand-subtitle">Deep Learning Brain MRI Classifier • BCA Academic Project</div>
+          <div class="brand-subtitle">Deep Learning Brain MRI Classifier • Individual Project</div>
         </div>
       </div>
 
@@ -44,9 +44,18 @@
         </button>
       </nav>
 
-      <div class="header-status">
-        <span class="status-indicator online"></span>
-        <span class="status-label">ResNet-18 Online</span>
+      <div class="header-right-group">
+        <button type="button" class="user-profile-trigger" id="openUserModalBtn" title="Clinician & Operator Specifications">
+          <div class="user-avatar-icon"><i data-lucide="user-check"></i></div>
+          <div class="user-avatar-text">
+            <span class="user-name-label" id="headerUserName">Dr. Sarah Mitchell</span>
+            <span class="user-id-badge" id="headerUserId">USR-8421</span>
+          </div>
+        </button>
+        <div class="header-status">
+          <span class="status-indicator online"></span>
+          <span class="status-label">ResNet-18 Online</span>
+        </div>
       </div>
     </div>
   </header>
@@ -116,27 +125,96 @@
             </div>
           </div>
 
-          <!-- Optional Patient Details Form (for PDF Report) -->
-          <div class="patient-metadata-accordion">
-            <button type="button" class="accordion-trigger" id="metaAccordionTrigger">
-              <span><i data-lucide="user-check"></i> Patient / Study Metadata (Optional for PDF Report)</span>
-              <i data-lucide="chevron-down" class="accordion-arrow"></i>
-            </button>
-            <div class="accordion-content" id="metaAccordionContent">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="patientNameInput">Patient / Case ID</label>
-                  <input type="text" id="patientNameInput" placeholder="e.g. Case #BCA-4029" value="Case #BCA-4029">
-                </div>
-                <div class="form-group">
-                  <label for="patientAgeInput">Age & Gender</label>
-                  <input type="text" id="patientAgeInput" placeholder="e.g. 42 / Female" value="45 / Male">
-                </div>
+          <!-- Patient Demographics & Study Specifications -->
+          <div class="patient-specifications-card">
+            <div class="spec-card-header">
+              <div class="spec-header-title">
+                <i data-lucide="user-check"></i>
+                <h3>Patient Demographics & Specifications</h3>
               </div>
+              <span class="badge badge-accent">Clinical Metadata</span>
+            </div>
+
+            <!-- 1-Click Case Study Presets -->
+            <div class="case-presets-group">
+              <label class="section-micro-label">1-Click Clinical Case Presets:</label>
+              <div class="case-preset-buttons">
+                <button type="button" class="btn-case-preset" data-preset="glioma">
+                  <span class="preset-name">Case 1: Glioma</span>
+                  <span class="preset-sub">Eleanor Vance • PID-40291</span>
+                </button>
+                <button type="button" class="btn-case-preset" data-preset="meningioma">
+                  <span class="preset-name">Case 2: Meningioma</span>
+                  <span class="preset-sub">Marcus Chen • PID-38104</span>
+                </button>
+                <button type="button" class="btn-case-preset" data-preset="pituitary">
+                  <span class="preset-name">Case 3: Pituitary</span>
+                  <span class="preset-sub">Sophia Davis • PID-71920</span>
+                </button>
+                <button type="button" class="btn-case-preset" data-preset="notumor">
+                  <span class="preset-name">Case 4: Normal</span>
+                  <span class="preset-sub">David Wilson • PID-19402</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="patient-form-grid">
               <div class="form-group">
-                <label for="clinicalNotesInput">Clinical Indication / Symptoms</label>
-                <input type="text" id="clinicalNotesInput" placeholder="e.g. Persistent headaches, visual blurring" value="Chronic cephalea, routine MRI screening">
+                <label for="patientIdInput">
+                  <span>Patient ID</span>
+                  <button type="button" class="btn-micro-action" id="genPatientIdBtn">
+                    <i data-lucide="refresh-cw"></i> Auto
+                  </button>
+                </label>
+                <input type="text" id="patientIdInput" class="form-input font-mono" placeholder="e.g. PID-40291" value="PID-40291">
               </div>
+
+              <div class="form-group">
+                <label for="patientNameInput">Patient Full Name</label>
+                <input type="text" id="patientNameInput" class="form-input" placeholder="e.g. Eleanor Vance" value="Eleanor Vance">
+              </div>
+
+              <div class="form-group">
+                <label for="patientAgeInput">Age & Gender</label>
+                <div class="input-split">
+                  <input type="text" id="patientAgeInput" class="form-input" placeholder="Age" value="45">
+                  <select id="patientGenderInput" class="form-select">
+                    <option value="Female" selected>Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="patientBloodInput">Blood Group</label>
+                <select id="patientBloodInput" class="form-select">
+                  <option value="A+" selected>A Positive (A+)</option>
+                  <option value="A-">A Negative (A-)</option>
+                  <option value="B+">B Positive (B+)</option>
+                  <option value="B-">B Negative (B-)</option>
+                  <option value="AB+">AB Positive (AB+)</option>
+                  <option value="AB-">AB Negative (AB-)</option>
+                  <option value="O+">O Positive (O+)</option>
+                  <option value="O-">O Negative (O-)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="refPhysicianInput">Referring Physician</label>
+              <input type="text" id="refPhysicianInput" class="form-input" placeholder="e.g. Dr. Robert Hayes, MD (Neurology)" value="Dr. Robert Hayes, MD (Neurology)">
+            </div>
+
+            <div class="form-group">
+              <label for="clinicalNotesInput">Clinical Indications & Symptoms</label>
+              <textarea id="clinicalNotesInput" class="form-textarea" rows="2" placeholder="e.g. Progressive morning cephalalgia, nausea, focal seizures...">Progressive morning cephalalgia for 6 weeks, nausea, focal motor seizure in left arm.</textarea>
+            </div>
+
+            <div class="evaluator-strip">
+              <span class="evaluator-label">Evaluating Operator:</span>
+              <span class="evaluator-val" id="scannerEvaluatorText">Dr. Sarah Mitchell, MD (USR-8421)</span>
+              <button type="button" class="btn-micro-edit" id="editEvaluatorBtn">Edit</button>
             </div>
           </div>
 
@@ -193,6 +271,20 @@
                   <span class="metric-val" id="confidenceVal">98.4%</span>
                   <span class="metric-lbl">Confidence</span>
                 </div>
+              </div>
+            </div>
+
+            <!-- Verified Patient & Clinician Study Metadata Strip -->
+            <div class="result-metadata-strip">
+              <div class="result-meta-block">
+                <span class="meta-block-title"><i data-lucide="user"></i> Patient Specifications:</span>
+                <span class="meta-block-primary" id="resPatientName">Eleanor Vance</span>
+                <span class="meta-block-sub" id="resPatientDetails">PID-40291 • 45y / Female • Blood: A+ • Ref: Dr. Robert Hayes, MD</span>
+              </div>
+              <div class="result-meta-block border-left">
+                <span class="meta-block-title"><i data-lucide="stethoscope"></i> Evaluating Clinician:</span>
+                <span class="meta-block-primary" id="resClinicianName">Dr. Sarah Mitchell, MD</span>
+                <span class="meta-block-sub" id="resClinicianDetails">User ID: USR-8421 • Radiodiagnosis & Neuro-Oncology</span>
               </div>
             </div>
 
@@ -297,78 +389,326 @@
       </div>
     </section>
 
-    <!-- VIEW 3: TUMOR KNOWLEDGE BASE -->
+    <!-- VIEW 3: TUMOR KNOWLEDGE BASE & AI LIBRARY -->
     <section id="knowledgeView" class="view-panel">
       <div class="panel-header">
         <div>
-          <h2>Brain Tumor Pathology Encyclopedia</h2>
-          <p>Academic literature and clinical descriptions of the 4 diagnostic classifications handled by this Deep Learning model.</p>
+          <h2>Brain Tumor Pathology & AI Encyclopedia</h2>
+          <p>Academic literature, WHO classifications, hallmark MRI neuroimaging biomarkers, and Explainable AI (Grad-CAM) saliency criteria.</p>
         </div>
-        <span class="badge badge-tech">WHO Classification Standards</span>
+        <div class="panel-header-actions">
+          <button type="button" class="btn btn-secondary btn-sm" id="toggleMatrixBtn">
+            <i data-lucide="table"></i> <span>Toggle Comparative Matrix</span>
+          </button>
+          <span class="badge badge-tech">WHO 2021 CNS 5 Standards</span>
+        </div>
       </div>
 
-      <div class="knowledge-grid">
+      <!-- Search & Category Filter Toolbar -->
+      <div class="library-toolbar">
+        <div class="library-search-wrapper">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="text" id="tumorSearchInput" class="library-search-input" placeholder="Search pathology, hallmark symptom, WHO grade, molecular marker, therapy...">
+        </div>
+        <div class="library-filter-chips">
+          <button type="button" class="lib-chip active" data-filter="all">All Pathologies (4)</button>
+          <button type="button" class="lib-chip" data-filter="glioma">Glioma (High Risk)</button>
+          <button type="button" class="lib-chip" data-filter="meningioma">Meningioma (Moderate)</button>
+          <button type="button" class="lib-chip" data-filter="pituitary">Pituitary (Sellar)</button>
+          <button type="button" class="lib-chip" data-filter="notumor">Healthy Normal</button>
+        </div>
+      </div>
+
+      <!-- Comparative Matrix (Collapsible) -->
+      <div class="matrix-card-wrapper hidden" id="comparativeMatrixWrapper">
+        <div class="matrix-card-header">
+          <div class="matrix-title-group">
+            <i data-lucide="table" class="icon-accent"></i>
+            <h3>Multi-Class Neuro-Oncological Comparative Matrix</h3>
+          </div>
+          <span class="matrix-sub">Side-by-side diagnostic criteria breakdown</span>
+        </div>
+        <div class="matrix-table-responsive">
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th>Clinical Dimension</th>
+                <th class="col-glioma">Glioma Tumor</th>
+                <th class="col-meningioma">Meningioma</th>
+                <th class="col-pituitary">Pituitary Adenoma</th>
+                <th class="col-healthy">Healthy Normal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Classification</strong></td>
+                <td>Malignant Intra-Axial (Astrocytes / Oligodendrocytes)</td>
+                <td>Benign Extra-Axial (Arachnoid Cap Cells)</td>
+                <td>Benign Neuroendocrine (Adenohypophysis)</td>
+                <td>Physiological Normal Anatomy</td>
+              </tr>
+              <tr>
+                <td><strong>WHO Grade Tier</strong></td>
+                <td>Grade II to IV (Glioblastoma: Grade IV)</td>
+                <td>Grade I (80-85%), Grade II (15%), Grade III (1-3%)</td>
+                <td>Grade I Benign Neoplasm (Micro/Macroadenoma)</td>
+                <td>N/A (Non-Neoplastic Baseline)</td>
+              </tr>
+              <tr>
+                <td><strong>Contrast Enhancement</strong></td>
+                <td>Heterogeneous, irregular, thick peripheral ring enhancement</td>
+                <td>Avid, homogeneous enhancement with dural tail sign</td>
+                <td>Avid sellar mass; delayed uptake vs normal gland</td>
+                <td>No focal enhancement (BBB Intact)</td>
+              </tr>
+              <tr>
+                <td><strong>Vasogenic Edema</strong></td>
+                <td>Extensive finger-like edema on T2/FLAIR</td>
+                <td>Variable perilesional edema with CSF vascular cleft</td>
+                <td>Minimal to none; local chiasmatic compression</td>
+                <td>Absent (Preserved sulci & ventricles)</td>
+              </tr>
+              <tr>
+                <td><strong>Molecular Markers</strong></td>
+                <td>IDH1/2 mutations, 1p/19q codeletion, MGMT methylation</td>
+                <td>NF2 (22q loss), TRAF7, KLF4, AKT1</td>
+                <td>Pit-1, T-pit, SF-1 transcription lineages, MEN1</td>
+                <td>Wild-type physiological baseline</td>
+              </tr>
+              <tr>
+                <td><strong>Cardinal Symptoms</strong></td>
+                <td>Progressive morning headache, seizures, focal deficits</td>
+                <td>Insidious dull headache, localized seizures, cranial palsies</td>
+                <td>Bitemporal hemianopsia, endocrine hyper/hyposecretion</td>
+                <td>Asymptomatic / physiological baseline</td>
+              </tr>
+              <tr>
+                <td><strong>Clinical Management</strong></td>
+                <td>Maximal safe resection + Radiotherapy + Temozolomide</td>
+                <td>Surgical excision (Simpson I) / Stereotactic Radiosurgery</td>
+                <td>Dopamine agonists (Prolactinoma) / Endoscopic TSS surgery</td>
+                <td>Reassurance / No intervention</td>
+              </tr>
+              <tr>
+                <td><strong>Grad-CAM Focus</strong></td>
+                <td>Intense gradients along infiltrative necrotic ring boundaries</td>
+                <td>Spherical hotspot over dural attachment interface</td>
+                <td>Focal convergence onto sellar / suprasellar midpoint</td>
+                <td>Uniform, low-entropy diffuse baseline gradient</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Rich Pathology Encyclopedia Cards -->
+      <div class="knowledge-grid" id="knowledgeGrid">
         <!-- Glioma Card -->
-        <div class="knowledge-card">
+        <div class="knowledge-card glioma-border" data-category="glioma">
           <div class="k-header glioma-header">
-            <i data-lucide="alert-circle"></i>
-            <div>
+            <div class="k-title-box">
+              <span class="badge badge-danger">WHO Grade II - IV (GBM: Grade IV)</span>
               <h3>Glioma (Astrocytoma / Glioblastoma)</h3>
-              <span class="k-tag">Intra-Axial Malignant Neoplasm</span>
+              <span class="k-tag">Intra-Axial Malignant Neoplasm • High Risk</span>
             </div>
+            <button type="button" class="btn-inspect-sample" data-sample="glioma_sample.jpg" data-preset="glioma" title="Analyze in Scanner">
+              <i data-lucide="scan"></i> Inspect MRI
+            </button>
           </div>
           <div class="k-body">
-            <p><strong>Pathophysiology:</strong> Develops from glial cells (astrocytes, oligodendrocytes, ependymal cells) that support and protect neurons.</p>
-            <p><strong>MRI Characteristics:</strong> Poorly defined infiltrative margins, significant vasogenic edema, heterogeneous T2/FLAIR hyperintensity, necrotic central ring enhancement on T1+Gd.</p>
-            <p><strong>Standard Management:</strong> Maximal safe surgical resection followed by radiotherapy and adjuvant temozolomide chemotherapy.</p>
+            <div class="k-info-row">
+              <strong>Cellular Origin:</strong> Glial support cells (Astrocytes, Oligodendrocytes, Ependymal cells).
+            </div>
+            <div class="k-info-row">
+              <strong>Epidemiology:</strong> ~80% of primary malignant brain tumors (~5.3 cases per 100,000 annually).
+            </div>
+            <div class="k-sub-block">
+              <div class="k-sub-title"><i data-lucide="microscope"></i> Hallmark Neuroimaging Presentation:</div>
+              <p>Poorly defined infiltrative margins, marked peritumoral vasogenic edema on T2/FLAIR, central necrosis with irregular thick peripheral nodular ring enhancement on post-gadolinium T1-weighted MRI.</p>
+            </div>
+            <div class="k-sub-block">
+              <div class="k-sub-title"><i data-lucide="dna"></i> Pathognomonic Molecular Biomarkers:</div>
+              <div class="marker-tags">
+                <span class="marker-tag">IDH1/IDH2 (R132H)</span>
+                <span class="marker-tag">1p/19q co-deletion</span>
+                <span class="marker-tag">MGMT methylation</span>
+                <span class="marker-tag">TERT promoter</span>
+                <span class="marker-tag">EGFR amp</span>
+              </div>
+            </div>
+            <div class="k-sub-block">
+              <div class="k-sub-title"><i data-lucide="activity"></i> Frequent Clinical Manifestations:</div>
+              <ul class="k-symptom-list">
+                <li>Progressive morning headaches with projectile vomiting</li>
+                <li>New-onset adult focal motor or generalized seizures</li>
+                <li>Contralateral hemiparesis and sensory deficit</li>
+                <li>Subacute cognitive decline, executive dysfunction & personality change</li>
+              </ul>
+            </div>
+            <div class="k-sub-block highlight-therapy">
+              <div class="k-sub-title"><i data-lucide="stethoscope"></i> Therapeutic Protocol:</div>
+              <p>Maximal safe microsurgical resection, Stupp Protocol (concomitant Radiotherapy 60 Gy + Temozolomide), 6 maintenance TMZ cycles, and Tumor Treating Fields (TTFields).</p>
+            </div>
+            <div class="k-sub-block highlight-ai">
+              <div class="k-sub-title"><i data-lucide="sparkles"></i> ResNet-18 Grad-CAM Saliency:</div>
+              <p>Intense focal convergence along infiltrative necrotic ring transitions and peritumoral edema boundaries on Layer 4 feature maps.</p>
+            </div>
           </div>
         </div>
 
         <!-- Meningioma Card -->
-        <div class="knowledge-card">
+        <div class="knowledge-card meningioma-border" data-category="meningioma">
           <div class="k-header meningioma-header">
-            <i data-lucide="shield"></i>
-            <div>
+            <div class="k-title-box">
+              <span class="badge badge-warning">WHO Grade I (80-85%), Grade II (15%), Grade III (1-3%)</span>
               <h3>Meningioma</h3>
-              <span class="k-tag">Extra-Axial Predominantly Benign</span>
+              <span class="k-tag">Extra-Axial Mesenchymal Neoplasm • Moderate Risk</span>
             </div>
+            <button type="button" class="btn-inspect-sample" data-sample="meningioma_sample.jpg" data-preset="meningioma" title="Analyze in Scanner">
+              <i data-lucide="scan"></i> Inspect MRI
+            </button>
           </div>
           <div class="k-body">
-            <p><strong>Pathophysiology:</strong> Originates in arachnoid cap cells of the meninges surrounding the central nervous system. Most frequent benign primary brain tumor (~35%).</p>
-            <p><strong>MRI Characteristics:</strong> Broad dural base, distinct circumscribed margins, strong uniform contrast enhancement, and diagnostic 'dural tail' sign.</p>
-            <p><strong>Standard Management:</strong> Regular active surveillance for asymptomatic lesions; stereotactic radiosurgery (Gamma Knife) or surgical excision for expanding tumors.</p>
+            <div class="k-info-row">
+              <strong>Cellular Origin:</strong> Arachnoid cap cells of arachnoid villi within the meningeal dura mater.
+            </div>
+            <div class="k-info-row">
+              <strong>Epidemiology:</strong> Most common primary non-glial intracranial neoplasm (~37-39% of all adult CNS tumors).
+            </div>
+            <div class="k-sub-block">
+              <div class="k-sub-title"><i data-lucide="microscope"></i> Hallmark Neuroimaging Presentation:</div>
+              <p>Sharply circumscribed extra-axial mass with broad dural base, pathognomonic "Dural Tail Sign" on contrast T1, avid homogeneous enhancement, CSF vascular cleft sign, and occasional adjacent hyperostosis.</p>
+            </div>
+            <div class="k-sub-block">
+              <div class="k-sub-title"><i data-lucide="dna"></i> Pathognomonic Molecular Biomarkers:</div>
+              <div class="marker-tags">
+                <span class="marker-tag">NF2 (22q loss)</span>
+                <span class="marker-tag">TRAF7 & KLF4</span>
+                <span class="marker-tag">AKT1 & SMO</span>
+                <span class="marker-tag">CDKN2A/B deletion</span>
+              </div>
+            </div>
+            <div class="k-sub-block">
+              <div class="k-sub-title"><i data-lucide="activity"></i> Frequent Clinical Manifestations:</div>
+              <ul class="k-symptom-list">
+                <li>Insidious, slowly progressing dull cephalalgia</li>
+                <li>Focal motor seizures due to cortical compression</li>
+                <li>Cranial nerve deficits (anosmia, diplopia, facial numbness)</li>
+                <li>Visual field disturbances (sphenoid wing or tuberculum sellae)</li>
+              </ul>
+            </div>
+            <div class="k-sub-block highlight-therapy">
+              <div class="k-sub-title"><i data-lucide="stethoscope"></i> Therapeutic Protocol:</div>
+              <p>Active observation with serial MRI for small asymptomatic lesions; complete microsurgical extirpation (Simpson Grade I-III goal); stereotactic radiosurgery for skull base lesions.</p>
+            </div>
+            <div class="k-sub-block highlight-ai">
+              <div class="k-sub-title"><i data-lucide="sparkles"></i> ResNet-18 Grad-CAM Saliency:</div>
+              <p>Sharp, compact spherical activation maps centered along the dural border interface and homogeneous contrast-enhanced parenchyma.</p>
+            </div>
           </div>
         </div>
 
         <!-- Pituitary Card -->
-        <div class="knowledge-card">
+        <div class="knowledge-card pituitary-border" data-category="pituitary">
           <div class="k-header pituitary-header">
-            <i data-lucide="activity"></i>
-            <div>
-              <h3>Pituitary Tumor (Adenoma)</h3>
-              <span class="k-tag">Sellar / Endocrine Mass</span>
+            <div class="k-title-box">
+              <span class="badge badge-accent">Benign Neuroendocrine (Micro & Macroadenoma)</span>
+              <h3>Pituitary Tumor (PitNET / Adenoma)</h3>
+              <span class="k-tag">Sellar / Suprasellar Neoplasm • Moderate Risk</span>
             </div>
+            <button type="button" class="btn-inspect-sample" data-sample="pituitary_sample.jpg" data-preset="pituitary" title="Analyze in Scanner">
+              <i data-lucide="scan"></i> Inspect MRI
+            </button>
           </div>
           <div class="k-body">
-            <p><strong>Pathophysiology:</strong> Neoplasm arising in the anterior pituitary gland within the sella turcica. Classified as functioning (hormone-secreting) or non-functioning.</p>
-            <p><strong>MRI Characteristics:</strong> Expansion of the sella turcica, suprasellar extension contacting the optic chiasm (causing bitemporal hemianopsia), dumbbell configuration.</p>
-            <p><strong>Standard Management:</strong> Dopamine agonists (cabergoline) for prolactinomas; transsphenoidal endoscopic surgery for macroadenomas.</p>
+            <div class="k-info-row">
+              <strong>Cellular Origin:</strong> Adenohypophyseal specialized neuroendocrine cells of the anterior pituitary gland.
+            </div>
+            <div class="k-info-row">
+              <strong>Epidemiology:</strong> ~10-15% of all intracranial neoplasms; incidental autopsy prevalence up to 16.7%.
+            </div>
+            <div class="k-sub-block">
+              <div class="k-sub-title"><i data-lucide="microscope"></i> Hallmark Neuroimaging Presentation:</div>
+              <p>Expansion of sella turcica with suprasellar extension, classic "figure-of-8" or "snowman" waist at diaphragmatic aperture, superior displacement of optic chiasm, and lateral cavernous sinus extension.</p>
+            </div>
+            <div class="k-sub-block">
+              <div class="k-sub-title"><i data-lucide="dna"></i> Pathognomonic Molecular Biomarkers:</div>
+              <div class="marker-tags">
+                <span class="marker-tag">Pit-1 (GH, PRL, TSH)</span>
+                <span class="marker-tag">T-pit (ACTH / Cushing)</span>
+                <span class="marker-tag">SF-1 (Gonadotroph)</span>
+                <span class="marker-tag">MEN1 & AIP germline</span>
+              </div>
+            </div>
+            <div class="k-sub-block">
+              <div class="k-sub-title"><i data-lucide="activity"></i> Frequent Clinical Manifestations:</div>
+              <ul class="k-symptom-list">
+                <li>Bitemporal hemianopsia from midline optic chiasm compression</li>
+                <li>Hyperprolactinemia (galactorrhea, amenorrhea, sexual dysfunction)</li>
+                <li>Acromegaly / gigantism (excess Growth Hormone)</li>
+                <li>Cushing's disease (ACTH excess with central adiposity)</li>
+              </ul>
+            </div>
+            <div class="k-sub-block highlight-therapy">
+              <div class="k-sub-title"><i data-lucide="stethoscope"></i> Therapeutic Protocol:</div>
+              <p>Dopamine agonist pharmacotherapy (Cabergoline, Bromocriptine) first-line for prolactinomas; Endoscopic endonasal transsphenoidal surgery (TSS) for macroadenomas.</p>
+            </div>
+            <div class="k-sub-block highlight-ai">
+              <div class="k-sub-title"><i data-lucide="sparkles"></i> ResNet-18 Grad-CAM Saliency:</div>
+              <p>Model activation cleanly converges onto the sellar-suprasellar midline floor, segmenting the pituitary fossa from adjacent brainstem structures.</p>
+            </div>
           </div>
         </div>
 
         <!-- Normal Scan Card -->
-        <div class="knowledge-card">
+        <div class="knowledge-card healthy-border" data-category="notumor">
           <div class="k-header healthy-header">
-            <i data-lucide="check-circle-2"></i>
-            <div>
-              <h3>Healthy Brain MRI (No Tumor)</h3>
-              <span class="k-tag">Normal Structural Anatomy</span>
+            <div class="k-title-box">
+              <span class="badge badge-success">Non-Pathological Anatomical Baseline</span>
+              <h3>Healthy Brain MRI (No Tumor / Normal Control)</h3>
+              <span class="k-tag">Normal Structural Anatomy • Low Risk</span>
             </div>
+            <button type="button" class="btn-inspect-sample" data-sample="notumor_sample.jpg" data-preset="notumor" title="Analyze in Scanner">
+              <i data-lucide="scan"></i> Inspect MRI
+            </button>
           </div>
           <div class="k-body">
-            <p><strong>Pathophysiology:</strong> Healthy neuro-architecture with no mass effect, focal lesions, midline shifts, or abnormal tissue contrast.</p>
-            <p><strong>MRI Characteristics:</strong> Bilateral hemispheric symmetry, patent lateral and 3rd/4th ventricles, preserved gray-white matter differentiation, normal sulcal spacing.</p>
-            <p><strong>Clinical Correlation:</strong> Screening slice shows no evidence of intracranial mass effect or focal enhancement.</p>
+            <div class="k-info-row">
+              <strong>Cellular Origin:</strong> Intact neuroglial parenchymal architecture without cellular atypia or dysplasia.
+            </div>
+            <div class="k-info-row">
+              <strong>Epidemiology:</strong> Negative control cohort in clinical neuroimaging screening protocols.
+            </div>
+            <div class="k-sub-block">
+              <div class="k-sub-title"><i data-lucide="microscope"></i> Hallmark Neuroimaging Presentation:</div>
+              <p>Bilateral cerebral and cerebellar hemispheric symmetry; intact midline falx cerebri with no mass effect; patent lateral, third, and fourth ventricles without dilatation; intact gray-white matter differentiation; preserved sulcal spacing.</p>
+            </div>
+            <div class="k-sub-block">
+              <div class="k-sub-title"><i data-lucide="dna"></i> Pathognomonic Molecular Biomarkers:</div>
+              <div class="marker-tags">
+                <span class="marker-tag">Wild-type baseline</span>
+                <span class="marker-tag">Intact BBB integrity</span>
+                <span class="marker-tag">Symmetric CMRO2</span>
+                <span class="marker-tag">No driver mutations</span>
+              </div>
+            </div>
+            <div class="k-sub-block">
+              <div class="k-sub-title"><i data-lucide="activity"></i> Frequent Clinical Manifestations:</div>
+              <ul class="k-symptom-list">
+                <li>Absence of focal neurologic deficits</li>
+                <li>Normative intracranial pressure hemodynamics</li>
+                <li>Physiological cranial nerve examination</li>
+                <li>Intact visual acuity and peripheral visual fields</li>
+              </ul>
+            </div>
+            <div class="k-sub-block highlight-therapy">
+              <div class="k-sub-title"><i data-lucide="stethoscope"></i> Therapeutic Protocol:</div>
+              <p>Routine reassurance; no neurosurgical or oncological intervention indicated. Diagnostic follow-up only in the event of emergent atypical neurological indicators.</p>
+            </div>
+            <div class="k-sub-block highlight-ai">
+              <div class="k-sub-title"><i data-lucide="sparkles"></i> ResNet-18 Grad-CAM Saliency:</div>
+              <p>Diffused, low-magnitude uniform activation throughout the cortical mantle with absence of localized high-gradient anomaly clusters.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -440,7 +780,7 @@
     <section id="vivaView" class="view-panel">
       <div class="panel-header">
         <div>
-          <h2>BCA Capstone Project Defense & Viva Voce Guide</h2>
+          <h2>Individual Project Defense & Viva Voce Guide</h2>
           <p>Comprehensive questions, answers, and technical rationale tailored for academic examiners and evaluators.</p>
         </div>
         <span class="badge badge-accent">Examiner Q&A Prepared</span>
@@ -483,7 +823,7 @@
             <i data-lucide="chevron-down"></i>
           </div>
           <div class="viva-answer">
-            <p><strong>Answer:</strong> The application incorporates explicit non-clinical warnings throughout the user interface, API responses, and the generated PDF reports. As this is an educational BCA project, it lacks formal medical device regulatory certifications (such as FDA 510(k) or EU MDR). Clearly presenting the system as an academic decision-support prototype ensures ethical AI compliance and prevents misinterpretation of algorithmic outputs as certified diagnoses.</p>
+            <p><strong>Answer:</strong> The application incorporates explicit non-clinical warnings throughout the user interface, API responses, and the generated PDF reports. As this is an individual educational and research project, it lacks formal medical device regulatory certifications (such as FDA 510(k) or EU MDR). Clearly presenting the system as an academic decision-support prototype ensures ethical AI compliance and prevents misinterpretation of algorithmic outputs as certified diagnoses.</p>
           </div>
         </div>
       </div>
@@ -495,7 +835,7 @@
     <div class="footer-container">
       <div class="footer-col">
         <div class="footer-brand">NeuroScan AI</div>
-        <p>BCA Academic Capstone Project on Deep Learning & Medical Image Processing.</p>
+        <p>Individual Project on Deep Learning & Medical Image Processing.</p>
       </div>
       <div class="footer-col">
         <div class="footer-heading">Technology Stack</div>
@@ -507,6 +847,85 @@
       </div>
     </div>
   </footer>
+
+  <!-- Clinician / User Profile Modal -->
+  <div class="modal-backdrop hidden" id="userProfileModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-icon"><i data-lucide="user-check"></i></div>
+          <div>
+            <h3>Active Clinician Specifications</h3>
+            <p>Evaluating physician & operator profile metadata</p>
+          </div>
+        </div>
+        <button type="button" class="btn-close-modal" id="closeUserModalBtn"><i data-lucide="x"></i></button>
+      </div>
+
+      <!-- Quick Clinician Presets -->
+      <div class="modal-presets">
+        <label class="section-micro-label">Quick Clinician Presets:</label>
+        <div class="preset-pill-grid">
+          <button type="button" class="preset-pill active" data-clinician="mitchell">
+            <strong>Dr. Sarah Mitchell</strong>
+            <small>USR-8421 • Radiologist</small>
+          </button>
+          <button type="button" class="preset-pill" data-clinician="rivera">
+            <strong>Dr. Alex Rivera</strong>
+            <small>USR-5190 • AI Fellow</small>
+          </button>
+          <button type="button" class="preset-pill" data-clinician="patel">
+            <strong>Dr. Priya Patel</strong>
+            <small>USR-9023 • Neurologist</small>
+          </button>
+        </div>
+      </div>
+
+      <form id="userProfileForm" class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modalUserId">User / Operator ID *</label>
+            <div class="input-with-action">
+              <input type="text" id="modalUserId" class="form-input font-mono" required value="USR-8421">
+              <button type="button" class="btn-input-action" id="modalGenUserIdBtn" title="Auto-generate ID"><i data-lucide="refresh-cw"></i></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="modalLicenseId">Medical License / Staff ID</label>
+            <input type="text" id="modalLicenseId" class="form-input" value="NMC-RAD-88341">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="modalUserName">Clinician Full Name *</label>
+          <input type="text" id="modalUserName" class="form-input" required value="Dr. Sarah Mitchell, MD">
+        </div>
+
+        <div class="form-group">
+          <label for="modalUserRole">Designation / Professional Title</label>
+          <input type="text" id="modalUserRole" class="form-input" value="Senior Consultant Neuro-Radiologist">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modalDepartment">Department</label>
+            <input type="text" id="modalDepartment" class="form-input" value="Department of Radiodiagnosis & Neuro-Oncology">
+          </div>
+          <div class="form-group">
+            <label for="modalHospital">Institution / Hospital</label>
+            <input type="text" id="modalHospital" class="form-input" value="NeuroScan Academic Medical Center">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" id="cancelUserModalBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i data-lucide="check"></i> <span>Save Clinician Specifications</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script src="/static/js/app.js"></script>
 </body>
