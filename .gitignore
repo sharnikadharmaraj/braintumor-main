@@ -28,3 +28,8 @@ Thumbs.db
 ehthumbs.db
 [Dd]esktop.ini
 .DS_Store
+
+# Temporary logs
+*.log
+py_err.txt
+py_out.txt
